@@ -4,6 +4,7 @@ Comprehensive breakdown of the stargazers for a  GitHub user.
 
 [gaze.watch](https://gaze.watch)
 
+![demo](docs/demo.gif)
 
 ## Dependencies
 
