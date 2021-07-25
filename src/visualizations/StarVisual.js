@@ -6,15 +6,13 @@ const color = d3.scaleLinear()
     .domain([0, 5])
     .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
     .interpolate(d3.interpolateHcl);
-const format = d3.format(",d");
-const height = 2000, width = 2000
+const width = 1000, height = 1000
 const pack = data => d3.pack()
     .size([width, height])
     .padding(3)
   (d3.hierarchy(data)
     .sum(d => d.value)
     .sort((a, b) => b.value - a.value))
-const data = require('./flare-2.json');
 
 class StarVisual extends React.Component {
 
@@ -22,27 +20,7 @@ class StarVisual extends React.Component {
     super(props);
     this.myRef = React.createRef(); 
   }
-  componentDidMount(){
-    console.log(this.myRef);
-    this.getChart();
-    // this.dataset = [100, 200, 300, 400, 500];
-    // let size = 500;
-    // let svg = d3.select(this.myRef.current)
-    //             .append('svg')
-    //             .attr('width', size)
-    //             .attr('height', size);
-    // let rect_width = 95;
-    // svg.selectAll('rect')
-    //     .data(this.dataset)
-    //     .enter()
-    //     .append('rect')
-    //     .attr('x', (d, i) => 5 + i*(rect_width + 5))
-    //     .attr('y', d => size - d)
-    //     .attr('width', rect_width)
-    //     .attr('height', d => d)
-    //     .attr('fill', 'teal');
 
-  }
   render(){
     return (
       <div ref={this.myRef}>
