@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { Box, Spinner } from 'grommet';
 import * as d3 from 'd3';
 
 const color = d3.scaleLinear()
@@ -22,25 +22,38 @@ class StarVisual extends React.Component {
   }
 
   render(){
-    return (
-      <div ref={this.myRef}>
-      </div>
+    const { loading } = this.props;
+    console.log(loading);
+
+    d3.select(this.myRef.current).selectAll("*").remove();
+    this.getChart(this.props.data);
+    return(
+      <Box align="center" justify="center" direction="column" fill>
+        { loading && <Spinner justify="center" /> }
+        <Box ref={this.myRef} fill={!loading} style={{display: loading ? "none" : "block"}}/>
+      </Box>
     );
   }
 
-  getChart() {
+  getChart(data) {
+    const STARGAZER_MIN = 10000;
+
     const root = pack(data);
     let focus = root;
     let view;
   
+    /* Base */
     const svg = d3.select(this.myRef.current).append("svg")
-        .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`)
-        .style("display", "block")
-        .style("margin", "0 -14px")
-        .style("background", color(0))
-        .style("cursor", "pointer")
-        .on("click", (event) => zoom(event, root));
+      .attr("viewBox", `-${width / 2} -${height / 2} ${width} ${height}`) //-${width / 2} -${height / 2} ${width} ${height}
+      .style("height", "100%")
+      .style("width", "100%")
+      .style("display", "block")
+      .style("margin", "0 -14px")
+      .style("background", color(0))
+      .style("cursor", "pointer")
+      .on("click", (event) => zoom(event, root));
   
+    /* Circles */
     const node = svg.append("g")
       .selectAll("circle")
       .data(root.descendants().slice(1))
@@ -51,15 +64,16 @@ class StarVisual extends React.Component {
         .on("mouseout", function() { d3.select(this).attr("stroke", null); })
         .on("click", (event, d) => focus !== d && (zoom(event, d), event.stopPropagation()));
   
+    /* Text labels */
     const label = svg.append("g")
-        .style("font", "10px sans-serif")
+        .style("font", "30px sans-serif")
         .attr("pointer-events", "none")
         .attr("text-anchor", "middle")
       .selectAll("text")
       .data(root.descendants())
       .join("text")
         .style("fill-opacity", d => d.parent === root ? 1 : 0)
-        .style("display", d => d.parent === root ? "inline" : "none")
+        .style("display", d => sum(d) > STARGAZER_MIN ? "inline" : "none")
         .text(d => d.data.name);
   
     zoomTo([root.x, root.y, root.r * 2]);
@@ -74,9 +88,7 @@ class StarVisual extends React.Component {
       node.attr("r", d => d.r * k);
     }
   
-    function zoom(event, d) {
-      const focus0 = focus;
-  
+    function zoom(event, d) {  
       focus = d;
   
       const transition = svg.transition()
@@ -87,15 +99,27 @@ class StarVisual extends React.Component {
           });
   
       label
-        .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+        .filter(function(d) { return (d.parent === focus || this.style.display === "inline") })
         .transition(transition)
           .style("fill-opacity", d => d.parent === focus ? 1 : 0)
-          .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+          .on("start", function(d) { if (d.parent === focus && sum(d) > STARGAZER_MIN) this.style.display = "inline"; })
           .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
     }
   
     return svg.node();
   }
 };
+
+function sum(node) {
+  let s = 0;
+  if('value' in node) s += node.value;
+  if(node === undefined || node.children === undefined) return s;
+  for(let c in node.children) {
+    const child = node.children[c];
+    s += child.value;
+  }
+  return s;
+}
+
 
 export default StarVisual;
