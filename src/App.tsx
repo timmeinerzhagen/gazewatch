@@ -27,7 +27,6 @@ class App extends React.Component {
   state = {
     octokit: new Octokit({
       previews: ["mercy-preview"],
-      auth: "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",
     }),
     stargazer_range: 300000,
     username: "timmeinerzhagen",
