@@ -8,6 +8,7 @@ import './App.css';
 import { Octokit } from "@octokit/rest"
 
 import StarredReposByOrgVisual from './visualizations/StarredReposByOrgVisual';
+import StarredReposByTopicVisual from './visualizations/StarredReposByTopicVisual';
 
 const theme = deepMerge(grommet, {
   global: {
@@ -42,6 +43,18 @@ class App extends React.Component {
         <Box align="center" pad="small" fill>
           <Box align="center" gap="medium" fill>
             <Tabs style={{height: "100%", width: "90%"}} padding="small" round="large">
+              {/* Starred repositories for user grouped by topic */}
+              <Tab title="Starred repositories for user grouped by topic">
+                <Box direction="column" gap="medium" pad="medium" align="center" justify="between" fill>
+                  <Box direction="row" gap="medium" align="center">
+                    <Keyboard onEnter={event => { this.setState({username: value})}}>
+                      <TextInput value={value} onChange={event => this.setState({value: event.target.value})}/>
+                    </Keyboard>
+                    <Button primary label="Visualize" onClick={() => {this.setState({username: value})}}/>
+                  </Box>
+                  <StarredReposByTopicVisual input={{username: username}} options={{range: stargazer_range}} context={{octokit: octokit}}/>
+                </Box>
+              </Tab>
               {/* Starred repositories for user grouped by org */}
               <Tab title="Starred repositories for user grouped by org">
                 <Box direction="column" gap="medium" pad="medium" align="center" justify="between" fill>
